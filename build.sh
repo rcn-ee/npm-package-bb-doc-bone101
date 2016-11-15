@@ -73,18 +73,20 @@ npm_install () {
 	echo "npm: [`${node_bin} ${npm_bin} --version`]"
 	echo "node: [`${node_bin} --version`]"
 
-#	npm_project="bonescript"
-#	git_project="bonescript"
-#	git_branch="0.5.x"
-#	git_user="https://github.com/jadonk"
-#	npm_git_install
-
 	npm_project="async"
 	package_version="2.0.0-rc.6"
 	npm_pkg_install
 
+	npm_project="async"
+	package_version="2.1.2"
+	npm_pkg_install
+
 	npm_project="sensortag"
 	package_version="1.2.2"
+	npm_pkg_install
+
+	npm_project="sensortag"
+	package_version="1.2.3"
 	npm_pkg_install
 }
 
