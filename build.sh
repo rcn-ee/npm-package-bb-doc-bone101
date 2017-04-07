@@ -9,6 +9,8 @@ npm_options="--unsafe-perm=true --progress=false --loglevel=error --prefix /usr/
 echo "Resetting: /usr/local/lib/node_modules/"
 rm -rf /usr/local/lib/node_modules/* || true
 
+distro=$(lsb_release -cs)
+
 npm_git_install () {
 	if [ -d /usr/local/lib/node_modules/${npm_project}/ ] ; then
 		rm -rf /usr/local/lib/node_modules/${npm_project}/ || true
@@ -36,8 +38,8 @@ npm_git_install () {
 	tar -cJf ${wfile}.tar.xz ${npm_project}/
 	cd -
 
-	if [ ! -f ./deploy/${wfile}.tar.xz ] ; then
-		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/
+	if [ ! -f ./deploy/${distro}/${wfile}.tar.xz ] ; then
+		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/${distro}/
 		echo "New Build: ${wfile}.tar.xz"
 	fi
 }
@@ -57,8 +59,8 @@ npm_pkg_install () {
 	tar -cJf ${wfile}.tar.xz ${npm_project}/
 	cd -
 
-	if [ ! -f ./deploy/${wfile}.tar.xz ] ; then
-		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/
+	if [ ! -f ./deploy/${distro}/${wfile}.tar.xz ] ; then
+		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/${distro}/
 		echo "New Build: ${wfile}.tar.xz"
 	fi
 }
@@ -81,12 +83,20 @@ npm_install () {
 	package_version="2.1.2"
 	npm_pkg_install
 
+	npm_project="async"
+	package_version="2.3.0"
+	npm_pkg_install
+
 	npm_project="sensortag"
 	package_version="1.2.2"
 	npm_pkg_install
 
 	npm_project="sensortag"
 	package_version="1.2.3"
+	npm_pkg_install
+
+	npm_project="sensortag"
+	package_version="1.3.0"
 	npm_pkg_install
 }
 
