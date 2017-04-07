@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 #requirements:
-#sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+#sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev python
 
 DIR=$PWD
 
