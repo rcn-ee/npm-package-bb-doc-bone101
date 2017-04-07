@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+#requirements:
+#sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+
 DIR=$PWD
 
 export NODE_PATH=/usr/local/lib/node_modules
