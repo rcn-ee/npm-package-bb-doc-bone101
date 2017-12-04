@@ -66,8 +66,8 @@ npm_pkg_install () {
 	fi
 
 	cd /tmp/
-	echo "TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version}/"
-	tmp_package=$(TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version}/ | tail -1)
+	echo "TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version}"
+	tmp_package=$(TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version} | tail -1)
 
 	echo "TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}"
 	TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}
