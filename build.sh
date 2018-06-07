@@ -5,14 +5,50 @@
 
 DIR=$PWD
 
+distro=$(lsb_release -cs)
+
+git config --global user.name "Robert Nelson"
+git config --global user.email robertcnelson@gmail.com
+
 export NODE_PATH=/usr/local/lib/node_modules
 
-npm_options="--unsafe-perm=true --progress=false --loglevel=error --prefix /usr/local"
+echo "Resetting: /usr/bin/npm"
+rm -rf /usr/bin/npm || true
+rm -rf /usr/lib/node_modules/npm/ || true
+
+apt update
+apt upgrade
+apt install nodejs --reinstall
 
 echo "Resetting: /usr/local/lib/node_modules/"
 rm -rf /usr/local/lib/node_modules/* || true
 
-distro=$(lsb_release -cs)
+#echo "npm: [/usr/bin/npm i -g npm@4.6.1]"
+#/usr/bin/npm i -g npm@4.6.1
+
+cd ../
+echo "Installing: npm-4.6.1.tgz from source"
+wget -c https://registry.npmjs.org/npm/-/npm-4.6.1.tgz
+if [ -d ./package/ ] ; then
+	rm -rf ./package/
+fi
+tar xf npm-4.6.1.tgz
+cd ./package/
+make install
+cd ../
+cd ./npm-package-bb-doc-bone101/
+
+echo "npm-deb: [`${node_bin} /usr/bin/npm --version`]"
+
+if [ -f /usr/lib/node_modules/npm/bin/npm-cli.js ] ; then
+	echo "npm4-/usr/lib/: [`${node_bin} /usr/lib/node_modules/npm/bin/npm-cli.js --version`]"
+fi
+if [ -f /usr/local/lib/node_modules/npm/bin/npm-cli.js ] ; then
+	echo "npm4-/usr/local/lib/: [`${node_bin} /usr/local/lib/node_modules/npm/bin/npm-cli.js --version`]"
+fi
+
+npm_options="--unsafe-perm=true --progress=false --loglevel=error --prefix /usr/local"
+
 
 npm_git_install () {
 	if [ -d /usr/local/lib/node_modules/${npm_project}/ ] ; then
@@ -32,23 +68,18 @@ npm_git_install () {
 		package_version=$(cat package.json | grep version | awk -F '"' '{print $4}' || true)
 		git_version=$(git rev-parse --short HEAD)
 
-		cd /tmp/
-		echo "TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}/"
-		tmp_package=$(TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}/ | tail -1)
-
-		echo "TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}"
-		TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}
-
-		cd $DIR/
+		TERM=dumb ${node_bin} ${npm_bin} install -g ${npm_options}
+		cd ${DIR}/
 	fi
 
+	echo "Packaging: ${npm_project}"
 	wfile="${npm_project}-${package_version}-${git_version}-${node_version}"
 	cd /usr/local/lib/node_modules/
 	if [ -f ${wfile}.tar.xz ] ; then
 		rm -rf ${wfile}.tar.xz || true
 	fi
-	tar -hcJf ${wfile}.tar.xz ${npm_project}/
-	cd -
+	tar -cJf ${wfile}.tar.xz ${npm_project}/
+	cd ${DIR}/
 
 	if [ ! -f ./deploy/${distro}/${wfile}.tar.xz ] ; then
 		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/${distro}/
@@ -65,22 +96,15 @@ npm_pkg_install () {
 		rm -rf /usr/local/lib/node_modules/${npm_project}/ || true
 	fi
 
-	cd /tmp/
-	echo "TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version}"
-	tmp_package=$(TERM=dumb ${node_bin} ${npm_bin} pack ${npm_project}@${package_version} | tail -1)
-
-	echo "TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}"
-	TERM=dumb ${node_bin} ${npm_bin} install -g ${tmp_package} ${npm_options}
-
-	cd $DIR/
+	TERM=dumb ${node_bin} ${npm_bin} install -g ${npm_options} ${npm_project}@${package_version}
 
 	wfile="${npm_project}-${package_version}-${node_version}"
 	cd /usr/local/lib/node_modules/
 	if [ -f ${wfile}.tar.xz ] ; then
 		rm -rf ${wfile}.tar.xz || true
 	fi
-	tar -hcJf ${wfile}.tar.xz ${npm_project}/
-	cd -
+	tar -cJf ${wfile}.tar.xz ${npm_project}/
+	cd ${DIR}/
 
 	if [ ! -f ./deploy/${distro}/${wfile}.tar.xz ] ; then
 		cp -v /usr/local/lib/node_modules/${wfile}.tar.xz ./deploy/${distro}/
@@ -90,7 +114,11 @@ npm_pkg_install () {
 
 npm_install () {
 	node_bin="/usr/bin/nodejs"
-	npm_bin="/usr/bin/npm"
+	if [ -f /usr/local/lib/node_modules/npm/bin/npm-cli.js ] ; then
+		npm_bin="/usr/local/lib/node_modules/npm/bin/npm-cli.js"
+	else
+		npm_bin="/usr/lib/node_modules/npm/bin/npm-cli.js"
+	fi
 
 	unset node_version
 	node_version=$(${node_bin} --version || true)
